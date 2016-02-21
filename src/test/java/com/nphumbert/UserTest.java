@@ -1,16 +1,26 @@
 package com.nphumbert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class UserTest {
+
+    private HashProvider hashProvider;
+
+    @Before
+    public void setUp() throws Exception {
+        hashProvider = mock(HashProvider.class);
+    }
 
     @Test
     public void should_create_user() {
         // when
-        User user = new User("jdoe", "john.doe@gmail.com", "password");
+        User user = new User("jdoe", "john.doe@gmail.com", "password", hashProvider);
 
         // then
         assertThat(user.login(), is("jdoe"));
@@ -19,11 +29,14 @@ public class UserTest {
 
     @Test
     public void should_hash_password_when_create_user() {
+        // given
+        when(hashProvider.hash("secret")).thenReturn("hash");
+
         // when
-        User user = new User("jdoe", "john.doe@gmail.com", "password");
+        User user = new User("jdoe", "john.doe@gmail.com", "secret", hashProvider);
 
         // then
-        assertThat(user.password(), is("[94, -120, 72, -104, -38, 40, 4, 113, 81, -48, -27, 111, -115, -58, 41, 39, 115, 96, 61, 13, 106, -85, -67, -42, 42, 17, -17, 114, 29, 21, 66, -40]"));
+        assertThat(user.password(), is("hash"));
     }
 
 }
