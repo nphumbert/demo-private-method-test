@@ -2,6 +2,9 @@ package com.nphumbert;
 
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -17,13 +20,21 @@ public class UserTest {
         assertThat(user.email(), is("john.doe@gmail.com"));
     }
 
+    /**
+     * Inappropriate way to test the hash of the password.
+     */
     @Test
-    public void should_hash_password_when_create_user() {
+    public void should_hash_password() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        // given
+        User user = new User("jdoe", "john.doe@gmail.com", "secret");
+        Method method = user.getClass().getDeclaredMethod("hash", String.class);
+        method.setAccessible(true);
+
         // when
-        User user = new User("jdoe", "john.doe@gmail.com", "password");
+        String hashedPassword = (String) method.invoke(user, "secret");
 
         // then
-        assertThat(user.password(), is("[94, -120, 72, -104, -38, 40, 4, 113, 81, -48, -27, 111, -115, -58, 41, 39, 115, 96, 61, 13, 106, -85, -67, -42, 42, 17, -17, 114, 29, 21, 66, -40]"));
+        assertThat(hashedPassword, is("[43, -72, 13, 83, 123, 29, -93, -29, -117, -45, 3, 97, -86, -123, 86, -122, -67, -32, -22, -51, 113, 98, -2, -10, -94, 95, -23, 123, -11, 39, -94, 91]"));
     }
 
 }
